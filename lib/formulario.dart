@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 enum ModoAutenticar { Registrar, Entrar }
@@ -10,20 +12,44 @@ class Formulario extends StatefulWidget {
 }
 
 class _FormularioState extends State<Formulario> {
-   ModoAutenticar _modoAutenticar = ModoAutenticar.Entrar;
+  final _senhaController = TextEditingController();
+  final _formKey=GlobalKey<FormState>();
+  bool _isLoading= false;
 
-  bool _isLogin()=>_modoAutenticar==ModoAutenticar.Entrar;
-  bool _isSingup()=>_modoAutenticar==ModoAutenticar.Registrar;
+  ModoAutenticar _modoAutenticar = ModoAutenticar.Entrar;
 
-    _alternarAutenticacao(){
-      setState(() {
-        if(_isLogin()){
-          _modoAutenticar= ModoAutenticar.Registrar;
-        }else{
-_modoAutenticar=ModoAutenticar.Entrar;
-        }
-      });
-    }
+  Map<String, String> _dadoAutenticar = {
+    'email': '',
+    'senha': '',
+  };
+
+  bool _isLogin() => _modoAutenticar == ModoAutenticar.Entrar;
+  bool _isSingup() => _modoAutenticar == ModoAutenticar.Registrar;
+
+  _alternarAutenticacao() {
+    setState(() {
+      if (_isLogin()) {
+        _modoAutenticar = ModoAutenticar.Registrar;
+      } else {
+        _modoAutenticar = ModoAutenticar.Entrar;
+      }
+    });
+  }
+void _submit(){
+  final isValid = _formKey.currentState?.validate()??false;
+  if(!isValid){
+    return;
+  }
+  setState(()=>_isLoading=true);
+  _formKey.currentState?.save();//qndo for salvar 
+  
+  if(_isLogin()){
+    //entrar
+  }else{
+    //registar
+  }
+  setState(()=>_isLoading=true);
+}
   @override
   Widget build(BuildContext context) {
     final tamDispositivo = MediaQuery.of(context).size;
@@ -36,17 +62,26 @@ _modoAutenticar=ModoAutenticar.Entrar;
             padding: const EdgeInsets.all(16),
             width: tamDispositivo.width * 0.90,
             child: Form(
+              key: _formKey,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   TextFormField(
-                      decoration: InputDecoration(
-                          border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(15)),
-                          hintText: 'Email',
-                          suffixIcon: const Icon(Icons.email)),
-                      keyboardType: TextInputType.none //emailAddress,
-                      ),
+                    decoration: InputDecoration(
+                        border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(15)),
+                        hintText: 'Email',
+                        suffixIcon: const Icon(Icons.email)),
+                    keyboardType: TextInputType.emailAddress,
+                    onSaved: (email) => _dadoAutenticar['email'] = email ?? '',
+                    validator: (_email) {
+                      final email = _email ?? '';
+                      if (email.trim().isEmpty || !email.contains('@')) {
+                        return 'Informe um email válido';
+                      }
+                      return null;
+                    },
+                  ),
                   const SizedBox(height: 16),
                   TextFormField(
                     decoration: InputDecoration(
@@ -54,11 +89,20 @@ _modoAutenticar=ModoAutenticar.Entrar;
                             borderRadius: BorderRadius.circular(15)),
                         hintText: 'Senha',
                         suffixIcon: const Icon(Icons.remove_red_eye)),
-                    keyboardType: TextInputType.none,
+                    keyboardType: TextInputType.multiline,
                     obscureText: true,
+                    controller: _senhaController,
+                    onSaved: (senha) => _dadoAutenticar['senha'] = senha ?? '',
+                    validator: (_senha) {
+                      final senha = _senha ?? '';
+                      if (senha.isEmpty || senha.length < 5) {
+                        return 'Informe uma senha válida';
+                      }
+                      return null;
+                    },
                   ),
                   const SizedBox(height: 16),
-                  if (_modoAutenticar == ModoAutenticar.Registrar)
+                  if (_isSingup())
                     Padding(
                       padding: const EdgeInsets.only(bottom: 16),
                       child: TextFormField(
@@ -68,8 +112,17 @@ _modoAutenticar=ModoAutenticar.Entrar;
                                 borderRadius: BorderRadius.circular(15)),
                             hintText: 'Confirmar senha',
                             suffixIcon: const Icon(Icons.remove_red_eye)),
-                        keyboardType: TextInputType.none,
+                        keyboardType: TextInputType.multiline,
                         obscureText: true,
+                        validator: _isLogin()
+                        ?null
+                        :(_senhaConf) {
+                          final senhaConf = _senhaConf ?? '';
+                          if (senhaConf != _senhaController.text) {
+                            return 'Senhas não conferem';
+                          }
+                          return null;
+                        },
                       ),
                     ),
                   //const SizedBox(height: 16),
@@ -82,8 +135,13 @@ _modoAutenticar=ModoAutenticar.Entrar;
                             Color.fromRGBO(250, 83, 140, 0.9),
                           ],
                         )),
-                    child: ElevatedButton(
-                      onPressed: () {},
+                    child:_isLoading
+                    ?Container(
+                      width: 50,
+                      height: 50,
+                      child: Center(child: CircularProgressIndicator()))
+                    : ElevatedButton(
+                      onPressed: _submit,
                       child: Padding(
                         padding: const EdgeInsets.symmetric(
                           vertical: 18,

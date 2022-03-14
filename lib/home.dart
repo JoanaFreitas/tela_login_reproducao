@@ -23,7 +23,7 @@ class Home extends StatelessWidget {
           ),
           SingleChildScrollView(
             child: Container(
-              padding: EdgeInsets.only(
+              padding:const EdgeInsets.only(
                 top: 30,
               ),
               child: Center(
