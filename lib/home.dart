@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:tela_login_rec/formulario.dart';
 
 class Home extends StatelessWidget {
+ 
   @override
   Widget build(BuildContext context) {
     final tamDispositivo = MediaQuery.of(context).size;
@@ -20,32 +21,20 @@ class Home extends StatelessWidget {
               ),
             ),
           ),
-          Center(
-            child: SingleChildScrollView(
-              child: Column(
-                // mainAxisAlignment: MainAxisAlignment.center,
-                // crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Column(
-                    children: [
-                      Image.asset('assets/images/imgSFundo.png'),
-                     const SizedBox(height: 30),
-                     const Formulario(),
-                      const SizedBox(height: 60),
-                      TextButton(
-                        onPressed: () {},
-                        style: TextButton.styleFrom(
-                            shape: RoundedRectangleBorder(
-                           borderRadius: BorderRadius.circular(10))),
-                        child:const Text(
-                          'Crie uma conta clicando aqui',
-                          style: TextStyle(color: Colors.white,
-                          fontSize: 20),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
+          SingleChildScrollView(
+            child: Container(
+              padding: EdgeInsets.only(
+                top: 30,
+              ),
+              child: Center(
+                child: Column(
+                 
+                  children: [
+                    Image.asset('assets/images/imgSFundo.png'),
+                    const SizedBox(height: 30),
+                    const Formulario(),                                     
+                  ],
+                ),
               ),
             ),
           )
